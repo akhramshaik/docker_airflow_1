@@ -2,8 +2,16 @@
 FROM python:3.6-buster
 #LABEL maintainer="cordon-thiago"
 # Never prompts the user for choices on installation/configuration of packages
-ENV DEBIAN_FRONTEND noninteractive
-ENV TERM linux
+#ENV DEBIAN_FRONTEND noninteractive
+#ENV TERM linux
+
+#Enabling repo and installing yum packages
+RUN export DEBIAN_FRONTEND=noninteractive &&\
+    apt update &&\
+    apt install -y vim mlocate net-tools git netcat &&\
+    mkdir -p /DG /DG/activeRelease/IDAP/ /DGdata /DGlogs &&\
+    useradd -m -s /bin/bash --uid 1000 sredev &&\
+	chown -R sredev:sredev /DG /DGdata /DGlogs && chmod 770 /DG /DGdata /DGlogs
 
 # Airflow
 ARG AIRFLOW_VERSION=1.10.7
@@ -31,7 +39,6 @@ RUN set -ex \
         libssl-dev \
         libffi-dev \
         libpq-dev \
-        git \
     ' \
     && apt-get update -yqq \
     && apt-get upgrade -yqq \
@@ -43,7 +50,6 @@ RUN set -ex \
         apt-utils \
         curl \
         rsync \
-        netcat \
         locales \
         iputils-ping \
         telnet \
