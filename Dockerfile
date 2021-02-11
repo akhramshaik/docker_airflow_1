@@ -6,7 +6,7 @@ FROM python:3.6-buster
 #ENV TERM linux
 
 #Login as Root USER
-USER 0
+#USER 0
 
 #Enabling repo and installing yum packages
 RUN export DEBIAN_FRONTEND=noninteractive &&\
@@ -90,6 +90,8 @@ RUN cp DGdata/config/entrypoint.sh / &&\
 
 COPY config/entrypoint.sh /entrypoint.sh
 COPY config/airflow.cfg ${AIRFLOW_HOME}/airflow/airflow.cfg
+
+COPY dags/ /usr/local/airflow/dags
 
 RUN chown -R airflow: ${AIRFLOW_HOME}
 RUN chmod +x entrypoint.sh
