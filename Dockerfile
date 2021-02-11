@@ -5,6 +5,9 @@ FROM python:3.6-buster
 #ENV DEBIAN_FRONTEND noninteractive
 #ENV TERM linux
 
+#Login as Root USER
+USER 0
+
 #Enabling repo and installing yum packages
 RUN export DEBIAN_FRONTEND=noninteractive &&\
     apt update &&\
@@ -12,6 +15,8 @@ RUN export DEBIAN_FRONTEND=noninteractive &&\
     mkdir -p /DG /DG/activeRelease/IDAP/ /DGdata /DGlogs &&\
     useradd -m -s /bin/bash --uid 1000 sredev &&\
 	chown -R sredev:sredev /DG /DGdata /DGlogs && chmod 770 /DG /DGdata /DGlogs
+
+COPY config/ /DGdata/config
 
 # Airflow
 ARG AIRFLOW_VERSION=1.10.7
@@ -31,7 +36,11 @@ ENV LC_MESSAGES en_US.UTF-8
 
 COPY config/requirements.txt /requirements.txt
 
-RUN set -ex \
+RUN cp DGdata/config/entrypoint.sh / &&\
+	cp DGdata/config/airflow.cfg ${AIRFLOW_HOME}/airflow/ &&\
+	cp DGdata/config/requirements.txt / &&\
+	rm -rf /DGdata/config &&\
+    set -ex \
     && buildDeps=' \
         freetds-dev \
         libkrb5-dev \
