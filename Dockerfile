@@ -2,21 +2,8 @@
 FROM python:3.6-buster
 #LABEL maintainer="cordon-thiago"
 # Never prompts the user for choices on installation/configuration of packages
-#ENV DEBIAN_FRONTEND noninteractive
-#ENV TERM linux
-
-#Login as Root USER
-#USER 0
-
-#Enabling repo and installing yum packages
-RUN export DEBIAN_FRONTEND=noninteractive &&\
-    apt update &&\
-    apt install -y vim mlocate net-tools git netcat &&\
-    mkdir -p /DG /DG/activeRelease/IDAP/ /DGdata /DGlogs &&\
-    useradd -m -s /bin/bash --uid 1000 sredev &&\
-	chown -R sredev:sredev /DG /DGdata /DGlogs && chmod 770 /DG /DGdata /DGlogs
-
-COPY config/ /DGdata/config
+ENV DEBIAN_FRONTEND noninteractive
+ENV TERM linux
 
 # Airflow
 ARG AIRFLOW_VERSION=1.10.7
@@ -34,9 +21,7 @@ ENV LC_ALL en_US.UTF-8
 ENV LC_CTYPE en_US.UTF-8
 ENV LC_MESSAGES en_US.UTF-8
 
-#COPY config/requirements.txt /requirements.txt
-
-
+COPY config/requirements.txt /requirements.txt
 
 RUN set -ex \
     && buildDeps=' \
@@ -46,6 +31,7 @@ RUN set -ex \
         libssl-dev \
         libffi-dev \
         libpq-dev \
+        git \
     ' \
     && apt-get update -yqq \
     && apt-get upgrade -yqq \
@@ -57,6 +43,7 @@ RUN set -ex \
         apt-utils \
         curl \
         rsync \
+        netcat \
         locales \
         iputils-ping \
         telnet \
@@ -84,16 +71,10 @@ RUN set -ex \
         /usr/share/doc \
         /usr/share/doc-base \
     && python --version \
-    && pip freeze \
-    cp DGdata/config/entrypoint.sh / &&\
-	cp DGdata/config/airflow.cfg ${AIRFLOW_HOME}/airflow/ &&\
-	cp DGdata/config/requirements.txt / &&\
-	rm -rf /DGdata/config
+    && pip freeze
 
-#COPY config/entrypoint.sh /entrypoint.sh
-#COPY config/airflow.cfg ${AIRFLOW_HOME}/airflow/airflow.cfg
-
-COPY dags/ /usr/local/airflow/dags
+COPY config/entrypoint.sh /entrypoint.sh
+COPY config/airflow.cfg ${AIRFLOW_HOME}/airflow/airflow.cfg
 
 RUN chown -R airflow: ${AIRFLOW_HOME}
 RUN chmod +x entrypoint.sh
