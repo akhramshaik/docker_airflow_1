@@ -34,13 +34,11 @@ ENV LC_ALL en_US.UTF-8
 ENV LC_CTYPE en_US.UTF-8
 ENV LC_MESSAGES en_US.UTF-8
 
-COPY config/requirements.txt /requirements.txt
+#COPY config/requirements.txt /requirements.txt
 
-RUN cp DGdata/config/entrypoint.sh / &&\
-	cp DGdata/config/airflow.cfg ${AIRFLOW_HOME}/airflow/ &&\
-	cp DGdata/config/requirements.txt / &&\
-	rm -rf /DGdata/config &&\
-    set -ex \
+
+
+RUN set -ex \
     && buildDeps=' \
         freetds-dev \
         libkrb5-dev \
@@ -86,10 +84,14 @@ RUN cp DGdata/config/entrypoint.sh / &&\
         /usr/share/doc \
         /usr/share/doc-base \
     && python --version \
-    && pip freeze
+    && pip freeze \
+    cp DGdata/config/entrypoint.sh / &&\
+	cp DGdata/config/airflow.cfg ${AIRFLOW_HOME}/airflow/ &&\
+	cp DGdata/config/requirements.txt / &&\
+	rm -rf /DGdata/config
 
-COPY config/entrypoint.sh /entrypoint.sh
-COPY config/airflow.cfg ${AIRFLOW_HOME}/airflow/airflow.cfg
+#COPY config/entrypoint.sh /entrypoint.sh
+#COPY config/airflow.cfg ${AIRFLOW_HOME}/airflow/airflow.cfg
 
 COPY dags/ /usr/local/airflow/dags
 
